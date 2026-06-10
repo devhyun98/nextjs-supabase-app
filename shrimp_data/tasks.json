@@ -1,0 +1,257 @@
+{
+  "tasks": [
+    {
+      "id": "f97b9e48-a8ef-4172-ad18-3c2e945697df",
+      "name": "middleware.ts 및 라우트 보호 설정",
+      "description": "기존 lib/supabase/proxy.ts의 updateSession()을 재사용하여 middleware.ts를 생성합니다. /events/*, /profile/* 경로는 인증 필수, /admin/* 경로는 기본 인증 확인(role 체크는 Task 008에서 추가), /join/*, /auth/*, / 등은 공개 라우트로 설정합니다.",
+      "notes": "정적 파일(_next/static, _next/image, favicon.ico)은 매처에서 반드시 제외. 기존 proxy.ts는 수정하지 않음.",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2026-06-10T08:22:02.284Z",
+      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "relatedFiles": [
+        {
+          "path": "middleware.ts",
+          "type": "CREATE",
+          "description": "라우트 보호 미들웨어"
+        },
+        {
+          "path": "lib/supabase/proxy.ts",
+          "type": "REFERENCE",
+          "description": "updateSession 함수 재사용"
+        }
+      ],
+      "implementationGuide": "// middleware.ts 생성\nimport { updateSession } from '@/lib/supabase/proxy'\n// matcher 설정: /events/:path*, /profile/:path*, /admin/dashboard, /admin/events, /admin/users, /admin/stats\n// 제외: /admin/login, /join/:path*, /auth/:path*, /, /_next/static, /favicon.ico\nexport async function middleware(request) {\n  return await updateSession(request)\n}\nexport const config = { matcher: [...] }",
+      "verificationCriteria": "npm run typecheck 통과. /events 직접 접근 시 /auth/login으로 리다이렉트 확인. /join/[code] 접근 시 인증 없이 접근 가능 확인.",
+      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+    },
+    {
+      "id": "095a0576-6021-423a-b9cc-f3ab93feb592",
+      "name": "사용자 영역 레이아웃 컴포넌트 생성",
+      "description": "모바일 하단 내비게이션 바(bottom-nav.tsx)와 상단 Navbar(navbar.tsx)를 생성합니다. bottom-nav는 '내 이벤트', '+ 만들기', '프로필' 3개 항목으로 구성되며 모바일 전용(md:hidden)입니다. Navbar는 로고, 사용자 메뉴, 테마 전환 버튼을 포함합니다. 기존 logout-button.tsx, theme-switcher.tsx, auth-button.tsx를 재사용합니다.",
+      "notes": "BottomNav의 + 만들기 버튼은 FAB 스타일(rounded-full, primary color)로 강조. usePathname 사용으로 'use client' 필수.",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2026-06-10T08:22:02.284Z",
+      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "relatedFiles": [
+        {
+          "path": "components/layout/bottom-nav.tsx",
+          "type": "CREATE",
+          "description": "모바일 하단 네비게이션 바"
+        },
+        {
+          "path": "components/layout/navbar.tsx",
+          "type": "CREATE",
+          "description": "상단 헤더 네비게이션"
+        },
+        {
+          "path": "components/logout-button.tsx",
+          "type": "REFERENCE",
+          "description": "로그아웃 버튼 재사용"
+        },
+        {
+          "path": "components/theme-switcher.tsx",
+          "type": "REFERENCE",
+          "description": "테마 전환 재사용"
+        },
+        {
+          "path": "lib/utils.ts",
+          "type": "REFERENCE",
+          "description": "cn() 유틸리티 재사용"
+        }
+      ],
+      "implementationGuide": "// components/layout/bottom-nav.tsx\n'use client'\nusePathname()으로 활성 링크 감지\n항목: Home(/events), Plus(/events/create), User(/profile)\nmd:hidden으로 데스크톱에서 숨김\nfixed bottom-0으로 하단 고정\n\n// components/layout/navbar.tsx\n서버 컴포넌트 기본\n로고 + 앱 이름 좌측\nThemeSwitcher + 사용자 메뉴 우측\n사용자 메뉴: 프로필 링크, LogoutButton 포함",
+      "verificationCriteria": "Navbar와 BottomNav가 정상 렌더링. 모바일(375px)에서 BottomNav 표시, 데스크톱(1024px)에서 숨겨짐 확인. 활성 라우트 링크 하이라이트 동작 확인.",
+      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+    },
+    {
+      "id": "f123d180-9497-491b-b58b-31b8b8f54e72",
+      "name": "관리자 레이아웃 컴포넌트 생성",
+      "description": "관리자 영역 전용 사이드바(admin-sidebar.tsx)와 app/admin/layout.tsx를 생성합니다. 사이드바에는 Dashboard, Events, Users, Stats 메뉴가 있으며 활성 링크 하이라이트가 적용됩니다. 레이아웃은 사이드바 + 콘텐츠 영역으로 구성됩니다.",
+      "notes": "관리자 레이아웃은 ProtectedLayout과 별개로 독립 구성. /admin/login 페이지는 이 레이아웃 제외.",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2026-06-10T08:22:02.284Z",
+      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "relatedFiles": [
+        {
+          "path": "components/layout/admin-sidebar.tsx",
+          "type": "CREATE",
+          "description": "관리자 전용 사이드바"
+        },
+        {
+          "path": "app/admin/layout.tsx",
+          "type": "CREATE",
+          "description": "관리자 영역 레이아웃"
+        },
+        {
+          "path": "lib/utils.ts",
+          "type": "REFERENCE",
+          "description": "cn() 유틸리티 재사용"
+        }
+      ],
+      "implementationGuide": "// components/layout/admin-sidebar.tsx\n'use client'\nusePathname()으로 활성 메뉴 감지\n메뉴 항목: Dashboard(/admin/dashboard), Events(/admin/events), Users(/admin/users), Stats(/admin/stats)\nLucide 아이콘 사용 (LayoutDashboard, Calendar, Users, BarChart)\ndesktop: fixed left sidebar, w-64\n\n// app/admin/layout.tsx\nflex 레이아웃: AdminSidebar(좌측) + main(우측)\nmain: flex-1, overflow-auto",
+      "verificationCriteria": "관리자 페이지 접근 시 사이드바 표시 확인. 각 메뉴 클릭 시 해당 페이지로 이동 확인. 활성 메뉴 항목 하이라이트 동작 확인.",
+      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+    },
+    {
+      "id": "3708f39c-0990-4d7b-878f-5fd4b682a7cf",
+      "name": "사용자 영역 Protected 레이아웃 및 이벤트 라우트 페이지 생성",
+      "description": "기존 app/protected/layout.tsx를 Navbar와 BottomNav를 포함하도록 수정하고, 이벤트 관련 4개 페이지를 빈 껍데기로 생성합니다: /events, /events/create, /events/[id], /events/[id]/edit. 각 페이지는 h1 제목과 기본 구조만 포함합니다.",
+      "notes": "events/[id]/page.tsx와 events/[id]/edit/page.tsx는 params: { id: string } 타입 선언 필요. 빈 껍데기이므로 API 연동 없음.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "095a0576-6021-423a-b9cc-f3ab93feb592"
+        }
+      ],
+      "createdAt": "2026-06-10T08:22:02.284Z",
+      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "relatedFiles": [
+        {
+          "path": "app/protected/layout.tsx",
+          "type": "TO_MODIFY",
+          "description": "Navbar, BottomNav 추가"
+        },
+        {
+          "path": "app/events/page.tsx",
+          "type": "CREATE",
+          "description": "내 이벤트 목록 페이지"
+        },
+        {
+          "path": "app/events/create/page.tsx",
+          "type": "CREATE",
+          "description": "이벤트 생성 페이지"
+        },
+        {
+          "path": "app/events/[id]/page.tsx",
+          "type": "CREATE",
+          "description": "이벤트 상세 페이지"
+        },
+        {
+          "path": "app/events/[id]/edit/page.tsx",
+          "type": "CREATE",
+          "description": "이벤트 수정 페이지"
+        },
+        {
+          "path": "components/layout/navbar.tsx",
+          "type": "DEPENDENCY",
+          "description": "Navbar 컴포넌트"
+        },
+        {
+          "path": "components/layout/bottom-nav.tsx",
+          "type": "DEPENDENCY",
+          "description": "BottomNav 컴포넌트"
+        }
+      ],
+      "implementationGuide": "// app/protected/layout.tsx 수정\nNavbar 상단 추가\nBottomNav 하단 추가\nmain: pb-16 (BottomNav 높이 확보)\n\n// 빈 껍데기 패턴 (모든 페이지 공통):\nexport default function EventsPage() {\n  return (\n    <main className='container mx-auto px-4 py-6'>\n      <h1 className='text-2xl font-bold'>내 이벤트</h1>\n    </main>\n  )\n}",
+      "verificationCriteria": "4개 이벤트 라우트 접근 시 각 페이지 정상 렌더링. Navbar와 BottomNav가 모든 이벤트 페이지에 표시됨. TypeScript 에러 없음.",
+      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+    },
+    {
+      "id": "383006d3-a37c-4bd4-af63-5efa2300b585",
+      "name": "참여자, 프로필, 관리자 라우트 페이지 생성",
+      "description": "나머지 9개 페이지를 빈 껍데기로 생성합니다: /join/[inviteCode], /profile, /profile/edit, /admin/login, /admin/dashboard, /admin/events, /admin/users, /admin/stats. /join/[inviteCode]는 공개 라우트(인증 불필요)이며, 관리자 페이지들은 admin/layout.tsx를 자동 적용받습니다.",
+      "notes": "/admin/login은 admin/layout.tsx가 자동 적용되지 않도록 app/admin/layout.tsx에서 login 경로 제외 처리 필요. 또는 /admin/login을 별도 처리.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "f123d180-9497-491b-b58b-31b8b8f54e72"
+        }
+      ],
+      "createdAt": "2026-06-10T08:22:02.284Z",
+      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "relatedFiles": [
+        {
+          "path": "app/join/[inviteCode]/page.tsx",
+          "type": "CREATE",
+          "description": "초대 링크 참여 페이지 (공개)"
+        },
+        {
+          "path": "app/profile/page.tsx",
+          "type": "CREATE",
+          "description": "사용자 프로필 페이지"
+        },
+        {
+          "path": "app/profile/edit/page.tsx",
+          "type": "CREATE",
+          "description": "프로필 수정 페이지"
+        },
+        {
+          "path": "app/admin/login/page.tsx",
+          "type": "CREATE",
+          "description": "관리자 로그인 페이지"
+        },
+        {
+          "path": "app/admin/dashboard/page.tsx",
+          "type": "CREATE",
+          "description": "관리자 대시보드 페이지"
+        },
+        {
+          "path": "app/admin/events/page.tsx",
+          "type": "CREATE",
+          "description": "이벤트 관리 페이지"
+        },
+        {
+          "path": "app/admin/users/page.tsx",
+          "type": "CREATE",
+          "description": "사용자 관리 페이지"
+        },
+        {
+          "path": "app/admin/stats/page.tsx",
+          "type": "CREATE",
+          "description": "통계 분석 페이지"
+        },
+        {
+          "path": "app/admin/layout.tsx",
+          "type": "DEPENDENCY",
+          "description": "관리자 레이아웃"
+        }
+      ],
+      "implementationGuide": "각 페이지 빈 껍데기 패턴:\nexport default function PageName() {\n  return (\n    <main className='container mx-auto px-4 py-6'>\n      <h1 className='text-2xl font-bold'>페이지명</h1>\n    </main>\n  )\n}\n\n// join/[inviteCode]/page.tsx: params: { inviteCode: string } 선언\n// admin/login/page.tsx: 관리자 레이아웃 적용 안됨 (별도 디렉토리 고려 or layout에서 제외 처리)\n// admin 페이지들: AdminLayout 자동 적용",
+      "verificationCriteria": "9개 페이지 모두 접근 시 정상 렌더링. /admin/login은 사이드바 없이 표시. /join/[inviteCode]는 인증 없이 접근 가능. TypeScript 에러 없음.",
+      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+    },
+    {
+      "id": "e96db338-3760-489b-8db3-8643d09b710c",
+      "name": "Task 002: 비즈니스 로직 TypeScript 타입 정의",
+      "description": "lib/types/ 디렉토리에 이벤트, 사용자, 공통 타입을 정의합니다. 현재 lib/types/database.ts의 Profile 타입을 참고하여 확장하고, 더미 데이터 활용(Phase 2)에 대비한 프론트엔드 타입을 설계합니다. DB 스키마는 Task 007에서 확정되므로, 이 단계에서는 UI 기반 임시 타입으로 정의합니다.",
+      "notes": "타입은 임시(UI 기반)이므로 'TODO: Task 007에서 DB 스키마와 동기화' 주석 추가. database.ts의 Profile 인터페이스는 수정하지 않고 UserProfile에서 extends로 확장.",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2026-06-10T08:22:02.284Z",
+      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "relatedFiles": [
+        {
+          "path": "lib/types/event.types.ts",
+          "type": "CREATE",
+          "description": "이벤트 관련 타입 정의"
+        },
+        {
+          "path": "lib/types/user.types.ts",
+          "type": "CREATE",
+          "description": "사용자 관련 타입 정의"
+        },
+        {
+          "path": "lib/types/common.types.ts",
+          "type": "CREATE",
+          "description": "공통 API 타입 정의"
+        },
+        {
+          "path": "lib/types/index.ts",
+          "type": "CREATE",
+          "description": "타입 통합 export 파일"
+        },
+        {
+          "path": "lib/types/database.ts",
+          "type": "REFERENCE",
+          "description": "기존 Profile 타입 참고"
+        }
+      ],
+      "implementationGuide": "// lib/types/event.types.ts\nenum EventStatus { UPCOMING, ONGOING, COMPLETED, CANCELLED }\ninterface Event { id, title, description, date, location, coverImage, createdBy, inviteCode, maxParticipants, status, createdAt, updatedAt }\ninterface EventParticipant { userId, eventId, joinedAt }\ntype CreateEventInput = Omit<Event, 'id' | 'inviteCode' | 'createdAt' | 'updatedAt'>\n\n// lib/types/user.types.ts\nenum UserRole { USER, ADMIN }\ninterface UserProfile extends Profile { role: UserRole }\n\n// lib/types/common.types.ts\ninterface ApiResponse<T> { data: T | null; error: string | null }\ninterface PaginationParams { page: number; limit: number }\ninterface PaginatedResponse<T> { items: T[]; total: number; page: number; totalPages: number }\n\n// lib/types/index.ts\nexport * from './event.types'\nexport * from './user.types'\nexport * from './common.types'",
+      "verificationCriteria": "npm run typecheck 에러 없음. @/lib/types에서 모든 타입 import 가능. Event, UserProfile, ApiResponse<T> 등 주요 타입 정상 사용 확인.",
+      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+    }
+  ]
+}
