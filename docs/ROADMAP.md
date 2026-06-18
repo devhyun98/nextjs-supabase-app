@@ -105,17 +105,18 @@ Gather는 5-30명 규모의 소규모 이벤트 주최자와 참여자를 위한
 
 ### Phase 3: 데이터베이스 설정 및 핵심 기능 구현
 
-- **Task 007: 데이터베이스 스키마 및 Supabase 초기 설정**
-  - UI 검토 후 최종 확정된 요구사항을 반영한 스키마 설계
-  - Supabase 데이터베이스 테이블 생성 (users, events, event_participants)
-  - Row Level Security (RLS) 정책 설정
-  - 인덱스 생성 (invite_code, created_by, event_id, user_id)
-  - Supabase Storage 버킷 생성 (event-covers)
-  - Realtime 구독 설정 준비
-  - UI에서 사용 중인 임시 타입을 실제 DB 스키마 타입으로 교체
+- **Task 007: 데이터베이스 스키마 및 Supabase 초기 설정** ✅
+  - ✅ UI 검토 후 최종 확정된 요구사항을 반영한 스키마 설계
+  - ✅ Supabase 데이터베이스 테이블 생성 (profiles, events, event_participants)
+  - ✅ Row Level Security (RLS) 정책 설정 및 보안 강화
+  - ✅ 인덱스 생성 (invite_code, created_by, event_id, user_id, role)
+  - ✅ Supabase Storage 버킷 생성 (event-covers)
+  - ✅ 함수 search_path 설정 (SECURITY_DEFINER 함수 보안 강화)
+  - ✅ 과도한 RLS 정책 제거 (INSERT 정책, 중복 admin 정책)
+  - ⏳ UI에서 사용 중인 임시 타입을 실제 DB 스키마 타입으로 교체 (Task 008~009에서 진행)
 
 - **Task 008: 인증 시스템 및 권한 관리**
-  - Google OAuth 로그인 플로우 완성 (F010)
+  - Google OAuth 로그인 플로우 완성 (F010) [제외]
   - 사용자 프로필 자동 생성 로직 구현
   - 관리자 권한 체크 미들웨어 구현 (role: admin)
   - 보호된 라우트 접근 제어 구현
