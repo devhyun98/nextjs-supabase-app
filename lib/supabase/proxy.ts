@@ -47,13 +47,15 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // 보호된 라우트 - 인증 필요
+  const protectedPaths = ['/events', '/profile', '/admin'];
+  const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
+
+  // /admin/login은 공개 경로 (보호 대상 제외)
+  const isAdminLogin = request.nextUrl.pathname === '/admin/login';
+
+  // 보호된 경로인데 미인증 + /admin/login이 아닌 경우
+  if (isProtectedPath && !user && !isAdminLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
