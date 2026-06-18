@@ -47,7 +47,7 @@ export default function LandingPage() {
           <Card className="bg-card">
             <CardHeader>
               <div className="flex items-start gap-3">
-                <Zap className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                <Zap className="h-6 w-6 text-primary mt-1 shrink-0" />
                 <div>
                   <CardTitle className="text-lg">빠른 생성</CardTitle>
                   <CardDescription>
@@ -61,7 +61,7 @@ export default function LandingPage() {
           <Card className="bg-card">
             <CardHeader>
               <div className="flex items-start gap-3">
-                <Users className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                <Users className="h-6 w-6 text-primary mt-1 shrink-0" />
                 <div>
                   <CardTitle className="text-lg">초대 링크</CardTitle>
                   <CardDescription>
@@ -75,7 +75,7 @@ export default function LandingPage() {
           <Card className="bg-card">
             <CardHeader>
               <div className="flex items-start gap-3">
-                <CheckCircle className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                <CheckCircle className="h-6 w-6 text-primary mt-1 shrink-0" />
                 <div>
                   <CardTitle className="text-lg">실시간 업데이트</CardTitle>
                   <CardDescription>

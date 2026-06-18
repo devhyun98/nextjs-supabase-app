@@ -88,7 +88,7 @@ export default function JoinPage({ params }: JoinPageProps) {
                 className="w-full aspect-video object-cover rounded-lg"
               />
             ) : (
-              <div className="w-full aspect-video bg-gradient-to-br from-slate-200 to-slate-300 rounded-lg flex items-center justify-center">
+              <div className="w-full aspect-video bg-linear-to-br from-slate-200 to-slate-300 rounded-lg flex items-center justify-center">
                 <span className="text-slate-400">이미지 없음</span>
               </div>
             )}

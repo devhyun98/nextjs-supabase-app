@@ -58,7 +58,7 @@ export function AdminSidebar() {
                   : 'text-gray-300 hover:bg-gray-800'
               )}
             >
-              <Icon className="h-5 w-5 flex-shrink-0" />
+              <Icon className="h-5 w-5 shrink-0" />
               <span>{item.label}</span>
             </Link>
           );
@@ -75,7 +75,7 @@ export function AdminSidebar() {
             'text-red-400 hover:bg-gray-800'
           )}
         >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
+          <LogOut className="h-5 w-5 shrink-0" />
           <span>로그아웃</span>
         </Link>
       </div>

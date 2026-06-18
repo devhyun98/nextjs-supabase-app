@@ -75,7 +75,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           className="w-full h-80 object-cover rounded-lg"
         />
       ) : (
-        <div className="w-full h-80 bg-gradient-to-br from-slate-200 to-slate-300 rounded-lg flex items-center justify-center">
+        <div className="w-full h-80 bg-linear-to-br from-slate-200 to-slate-300 rounded-lg flex items-center justify-center">
           <span className="text-slate-400">이미지 없음</span>
         </div>
       )}
