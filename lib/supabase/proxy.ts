@@ -61,6 +61,49 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 역할 기반 리다이렉트
+  if (user) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.sub)
+        .single()
+
+      const role = profile?.role || 'user'
+
+      // 관리자: /admin으로 시작하는 경로만 허용
+      if (role === 'admin') {
+        if (request.nextUrl.pathname === '/') {
+          const url = request.nextUrl.clone()
+          url.pathname = '/admin/dashboard'
+          return NextResponse.redirect(url)
+        }
+        if (!request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin/login') {
+          const url = request.nextUrl.clone()
+          url.pathname = '/admin/dashboard'
+          return NextResponse.redirect(url)
+        }
+      }
+
+      // 일반 사용자: /admin 경로 접근 불가
+      if (role === 'user') {
+        if (request.nextUrl.pathname.startsWith('/admin')) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/events'
+          return NextResponse.redirect(url)
+        }
+        if (request.nextUrl.pathname === '/') {
+          const url = request.nextUrl.clone()
+          url.pathname = '/events'
+          return NextResponse.redirect(url)
+        }
+      }
+    } catch (error) {
+      console.error('프로필 조회 오류:', error)
+    }
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

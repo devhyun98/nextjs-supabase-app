@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit } from 'lucide-react';
+import { Edit, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { currentUser } from '@/lib/data/current-user';
 import { getEventsByUser } from '@/lib/data/dummy-events';
+import { logoutAction } from '@/app/actions/auth';
 
 export default function ProfilePage() {
   const events = getEventsByUser(currentUser.id);
@@ -25,12 +26,20 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>내 프로필</CardTitle>
-          <Link href="/profile/edit">
-            <Button size="sm" variant="outline" className="gap-2">
-              <Edit className="h-4 w-4" />
-              수정
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/profile/edit">
+              <Button size="sm" variant="outline" className="gap-2">
+                <Edit className="h-4 w-4" />
+                수정
+              </Button>
+            </Link>
+            <form action={logoutAction}>
+              <Button type="submit" size="sm" variant="outline" className="gap-2 text-red-600 hover:text-red-700">
+                <LogOut className="h-4 w-4" />
+                로그아웃
+              </Button>
+            </form>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4">

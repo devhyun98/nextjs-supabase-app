@@ -43,17 +43,27 @@ export function EventForm({ mode, defaultValues }: EventFormProps) {
 
   const onSubmit = async (data: any) => {
     try {
-      const message =
-        mode === 'create'
-          ? '이벤트가 생성되었습니다 (데모)'
-          : '이벤트가 수정되었습니다 (데모)';
-      toast.success(message);
-      // 더미 데이터이므로 실제 저장 없음
+      if (mode === 'create') {
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || '이벤트 생성에 실패했습니다');
+        }
+
+        toast.success('이벤트가 생성되었습니다');
+      }
+
       setTimeout(() => {
         router.push('/events');
       }, 500);
     } catch (error) {
-      toast.error('오류가 발생했습니다');
+      const errorMessage = error instanceof Error ? error.message : '오류가 발생했습니다';
+      toast.error(errorMessage);
     }
   };
 

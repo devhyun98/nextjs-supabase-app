@@ -1,39 +1,38 @@
-'use client';
-
 export const dynamic = 'force-dynamic';
 
-import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EventStatusBadge } from '@/components/events/event-status-badge';
-import { toast } from 'sonner';
 import { getEventByInviteCode, getParticipantsByEvent } from '@/lib/data/dummy-events';
 import { EmptyState } from '@/components/empty-state';
 import { AlertCircle } from 'lucide-react';
+import { JoinEventButton } from '@/components/events/join-event-button';
+import Link from 'next/link';
 
 interface JoinPageProps {
-  params: {
+  params: Promise<{
     inviteCode: string;
-  };
+  }>;
 }
 
-export default function JoinPage({ params }: JoinPageProps) {
-  const router = useRouter();
-  const event = getEventByInviteCode(params.inviteCode);
+export default async function JoinPage({ params }: JoinPageProps) {
+  const { inviteCode } = await params;
+  const event = getEventByInviteCode(inviteCode);
 
   if (!event) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-6 gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            뒤로가기
-          </Button>
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className="mb-6 gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              뒤로가기
+            </Button>
+          </Link>
           <EmptyState
             icon={AlertCircle}
             title="유효하지 않은 초대 코드"
@@ -54,25 +53,18 @@ export default function JoinPage({ params }: JoinPageProps) {
     minute: '2-digit',
   }).format(new Date(event.eventDate));
 
-  const handleJoin = () => {
-    toast.success('이벤트에 참여했습니다 (데모)');
-    // 데모라서 실제 참여 처리 없음
-    setTimeout(() => {
-      router.push(`/events/${event.id}`);
-    }, 500);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          뒤로가기
-        </Button>
+        <Link href="/">
+          <Button
+            variant="ghost"
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            뒤로가기
+          </Button>
+        </Link>
 
         <Card>
           <CardHeader>
@@ -123,9 +115,7 @@ export default function JoinPage({ params }: JoinPageProps) {
             </div>
 
             {/* 참여 버튼 */}
-            <Button onClick={handleJoin} className="w-full">
-              이벤트에 참여하기
-            </Button>
+            <JoinEventButton inviteCode={inviteCode} />
           </CardContent>
         </Card>
       </div>

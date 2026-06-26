@@ -1,257 +1,217 @@
 {
   "tasks": [
     {
-      "id": "f97b9e48-a8ef-4172-ad18-3c2e945697df",
-      "name": "middleware.ts 및 라우트 보호 설정",
-      "description": "기존 lib/supabase/proxy.ts의 updateSession()을 재사용하여 middleware.ts를 생성합니다. /events/*, /profile/* 경로는 인증 필수, /admin/* 경로는 기본 인증 확인(role 체크는 Task 008에서 추가), /join/*, /auth/*, / 등은 공개 라우트로 설정합니다.",
-      "notes": "정적 파일(_next/static, _next/image, favicon.ico)은 매처에서 반드시 제외. 기존 proxy.ts는 수정하지 않음.",
+      "id": "907e9e4a-6a85-4d17-9c70-4e5a3f99e786",
+      "name": "Task 008-1: Supabase 프로필 생성 트리거",
+      "description": "Supabase auth.users에 새 사용자 생성 시 profiles 테이블에 자동 생성하는 SQL 트리거 작성. SECURITY_DEFINER 함수로 구현.",
+      "notes": "SECURITY_DEFINER 함수는 보안 주의. 관리자는 역할 수정으로 처리.",
       "status": "pending",
       "dependencies": [],
-      "createdAt": "2026-06-10T08:22:02.284Z",
-      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
+      "relatedFiles": [
+        {
+          "path": "docs/ROADMAP.md",
+          "type": "REFERENCE",
+          "description": "Task 008 사양"
+        }
+      ],
+      "implementationGuide": "1. Supabase SQL에서 handle_new_user() 함수 생성 2. AFTER INSERT ON auth.users 트리거 설정 3. INSERT INTO profiles(id, username, email, role, created_at, updated_at) 4. role은 기본값 user, username은 이메일 앞부분",
+      "verificationCriteria": "새 사용자 가입 시 profiles 자동 생성, 역할 설정 정상, RLS 충돌 없음",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
+    },
+    {
+      "id": "912ce452-f662-4ea2-99d6-3f6e5aa7e0f8",
+      "name": "Task 008-2: 미들웨어 역할 기반 리다이렉트",
+      "description": "middleware.ts 확장하여 인증된 사용자의 역할에 따라 대시보드 분기. 관리자는 /admin/dashboard, 사용자는 /events로 리다이렉트.",
+      "notes": "matcher: auth, api, join 경로 제외. 캐시 전략 검토 필요.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "907e9e4a-6a85-4d17-9c70-4e5a3f99e786"
+        }
+      ],
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
       "relatedFiles": [
         {
           "path": "middleware.ts",
-          "type": "CREATE",
-          "description": "라우트 보호 미들웨어"
-        },
-        {
-          "path": "lib/supabase/proxy.ts",
-          "type": "REFERENCE",
-          "description": "updateSession 함수 재사용"
-        }
-      ],
-      "implementationGuide": "// middleware.ts 생성\nimport { updateSession } from '@/lib/supabase/proxy'\n// matcher 설정: /events/:path*, /profile/:path*, /admin/dashboard, /admin/events, /admin/users, /admin/stats\n// 제외: /admin/login, /join/:path*, /auth/:path*, /, /_next/static, /favicon.ico\nexport async function middleware(request) {\n  return await updateSession(request)\n}\nexport const config = { matcher: [...] }",
-      "verificationCriteria": "npm run typecheck 통과. /events 직접 접근 시 /auth/login으로 리다이렉트 확인. /join/[code] 접근 시 인증 없이 접근 가능 확인.",
-      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
-    },
-    {
-      "id": "095a0576-6021-423a-b9cc-f3ab93feb592",
-      "name": "사용자 영역 레이아웃 컴포넌트 생성",
-      "description": "모바일 하단 내비게이션 바(bottom-nav.tsx)와 상단 Navbar(navbar.tsx)를 생성합니다. bottom-nav는 '내 이벤트', '+ 만들기', '프로필' 3개 항목으로 구성되며 모바일 전용(md:hidden)입니다. Navbar는 로고, 사용자 메뉴, 테마 전환 버튼을 포함합니다. 기존 logout-button.tsx, theme-switcher.tsx, auth-button.tsx를 재사용합니다.",
-      "notes": "BottomNav의 + 만들기 버튼은 FAB 스타일(rounded-full, primary color)로 강조. usePathname 사용으로 'use client' 필수.",
-      "status": "pending",
-      "dependencies": [],
-      "createdAt": "2026-06-10T08:22:02.284Z",
-      "updatedAt": "2026-06-10T08:22:02.284Z",
-      "relatedFiles": [
-        {
-          "path": "components/layout/bottom-nav.tsx",
-          "type": "CREATE",
-          "description": "모바일 하단 네비게이션 바"
-        },
-        {
-          "path": "components/layout/navbar.tsx",
-          "type": "CREATE",
-          "description": "상단 헤더 네비게이션"
-        },
-        {
-          "path": "components/logout-button.tsx",
-          "type": "REFERENCE",
-          "description": "로그아웃 버튼 재사용"
-        },
-        {
-          "path": "components/theme-switcher.tsx",
-          "type": "REFERENCE",
-          "description": "테마 전환 재사용"
-        },
-        {
-          "path": "lib/utils.ts",
-          "type": "REFERENCE",
-          "description": "cn() 유틸리티 재사용"
-        }
-      ],
-      "implementationGuide": "// components/layout/bottom-nav.tsx\n'use client'\nusePathname()으로 활성 링크 감지\n항목: Home(/events), Plus(/events/create), User(/profile)\nmd:hidden으로 데스크톱에서 숨김\nfixed bottom-0으로 하단 고정\n\n// components/layout/navbar.tsx\n서버 컴포넌트 기본\n로고 + 앱 이름 좌측\nThemeSwitcher + 사용자 메뉴 우측\n사용자 메뉴: 프로필 링크, LogoutButton 포함",
-      "verificationCriteria": "Navbar와 BottomNav가 정상 렌더링. 모바일(375px)에서 BottomNav 표시, 데스크톱(1024px)에서 숨겨짐 확인. 활성 라우트 링크 하이라이트 동작 확인.",
-      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
-    },
-    {
-      "id": "f123d180-9497-491b-b58b-31b8b8f54e72",
-      "name": "관리자 레이아웃 컴포넌트 생성",
-      "description": "관리자 영역 전용 사이드바(admin-sidebar.tsx)와 app/admin/layout.tsx를 생성합니다. 사이드바에는 Dashboard, Events, Users, Stats 메뉴가 있으며 활성 링크 하이라이트가 적용됩니다. 레이아웃은 사이드바 + 콘텐츠 영역으로 구성됩니다.",
-      "notes": "관리자 레이아웃은 ProtectedLayout과 별개로 독립 구성. /admin/login 페이지는 이 레이아웃 제외.",
-      "status": "pending",
-      "dependencies": [],
-      "createdAt": "2026-06-10T08:22:02.284Z",
-      "updatedAt": "2026-06-10T08:22:02.284Z",
-      "relatedFiles": [
-        {
-          "path": "components/layout/admin-sidebar.tsx",
-          "type": "CREATE",
-          "description": "관리자 전용 사이드바"
-        },
-        {
-          "path": "app/admin/layout.tsx",
-          "type": "CREATE",
-          "description": "관리자 영역 레이아웃"
-        },
-        {
-          "path": "lib/utils.ts",
-          "type": "REFERENCE",
-          "description": "cn() 유틸리티 재사용"
-        }
-      ],
-      "implementationGuide": "// components/layout/admin-sidebar.tsx\n'use client'\nusePathname()으로 활성 메뉴 감지\n메뉴 항목: Dashboard(/admin/dashboard), Events(/admin/events), Users(/admin/users), Stats(/admin/stats)\nLucide 아이콘 사용 (LayoutDashboard, Calendar, Users, BarChart)\ndesktop: fixed left sidebar, w-64\n\n// app/admin/layout.tsx\nflex 레이아웃: AdminSidebar(좌측) + main(우측)\nmain: flex-1, overflow-auto",
-      "verificationCriteria": "관리자 페이지 접근 시 사이드바 표시 확인. 각 메뉴 클릭 시 해당 페이지로 이동 확인. 활성 메뉴 항목 하이라이트 동작 확인.",
-      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
-    },
-    {
-      "id": "3708f39c-0990-4d7b-878f-5fd4b682a7cf",
-      "name": "사용자 영역 Protected 레이아웃 및 이벤트 라우트 페이지 생성",
-      "description": "기존 app/protected/layout.tsx를 Navbar와 BottomNav를 포함하도록 수정하고, 이벤트 관련 4개 페이지를 빈 껍데기로 생성합니다: /events, /events/create, /events/[id], /events/[id]/edit. 각 페이지는 h1 제목과 기본 구조만 포함합니다.",
-      "notes": "events/[id]/page.tsx와 events/[id]/edit/page.tsx는 params: { id: string } 타입 선언 필요. 빈 껍데기이므로 API 연동 없음.",
-      "status": "pending",
-      "dependencies": [
-        {
-          "taskId": "095a0576-6021-423a-b9cc-f3ab93feb592"
-        }
-      ],
-      "createdAt": "2026-06-10T08:22:02.284Z",
-      "updatedAt": "2026-06-10T08:22:02.284Z",
-      "relatedFiles": [
-        {
-          "path": "app/protected/layout.tsx",
           "type": "TO_MODIFY",
-          "description": "Navbar, BottomNav 추가"
-        },
-        {
-          "path": "app/events/page.tsx",
-          "type": "CREATE",
-          "description": "내 이벤트 목록 페이지"
-        },
-        {
-          "path": "app/events/create/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 생성 페이지"
-        },
-        {
-          "path": "app/events/[id]/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 상세 페이지"
-        },
-        {
-          "path": "app/events/[id]/edit/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 수정 페이지"
-        },
-        {
-          "path": "components/layout/navbar.tsx",
-          "type": "DEPENDENCY",
-          "description": "Navbar 컴포넌트"
-        },
-        {
-          "path": "components/layout/bottom-nav.tsx",
-          "type": "DEPENDENCY",
-          "description": "BottomNav 컴포넌트"
+          "description": "역할 기반 리다이렉트 추가"
         }
       ],
-      "implementationGuide": "// app/protected/layout.tsx 수정\nNavbar 상단 추가\nBottomNav 하단 추가\nmain: pb-16 (BottomNav 높이 확보)\n\n// 빈 껍데기 패턴 (모든 페이지 공통):\nexport default function EventsPage() {\n  return (\n    <main className='container mx-auto px-4 py-6'>\n      <h1 className='text-2xl font-bold'>내 이벤트</h1>\n    </main>\n  )\n}",
-      "verificationCriteria": "4개 이벤트 라우트 접근 시 각 페이지 정상 렌더링. Navbar와 BottomNav가 모든 이벤트 페이지에 표시됨. TypeScript 에러 없음.",
-      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+      "implementationGuide": "1. middleware.ts 수정: createServerClient() 호출 2. supabase.auth.getUser()로 인증 확인 3. profiles에서 role 조회 4. role='admin' 시 /admin/dashboard 리다이렉트 5. role='user' 시 /events 리다이렉트 6. matcher 설정으로 공개 경로 제외",
+      "verificationCriteria": "역할별 올바른 대시보드 리다이렉트, 공개 경로 제외, 권한 없는 접근 차단",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
     },
     {
-      "id": "383006d3-a37c-4bd4-af63-5efa2300b585",
-      "name": "참여자, 프로필, 관리자 라우트 페이지 생성",
-      "description": "나머지 9개 페이지를 빈 껍데기로 생성합니다: /join/[inviteCode], /profile, /profile/edit, /admin/login, /admin/dashboard, /admin/events, /admin/users, /admin/stats. /join/[inviteCode]는 공개 라우트(인증 불필요)이며, 관리자 페이지들은 admin/layout.tsx를 자동 적용받습니다.",
-      "notes": "/admin/login은 admin/layout.tsx가 자동 적용되지 않도록 app/admin/layout.tsx에서 login 경로 제외 처리 필요. 또는 /admin/login을 별도 처리.",
+      "id": "b7a72396-d95f-49f4-9ae3-fcccff330e19",
+      "name": "Task 008-3: 로그아웃 Server Action",
+      "description": "사용자 로그아웃 기능 구현. Server Action으로 signOut() 호출 후 login 페이지로 리다이렉트.",
+      "notes": "로그아웃 후 세션 쿠키 자동 삭제.",
       "status": "pending",
       "dependencies": [
         {
-          "taskId": "f123d180-9497-491b-b58b-31b8b8f54e72"
+          "taskId": "907e9e4a-6a85-4d17-9c70-4e5a3f99e786"
         }
       ],
-      "createdAt": "2026-06-10T08:22:02.284Z",
-      "updatedAt": "2026-06-10T08:22:02.284Z",
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
+      "relatedFiles": [
+        {
+          "path": "app/actions/auth.ts",
+          "type": "TO_MODIFY",
+          "description": "logoutAction 추가"
+        },
+        {
+          "path": "app/(user)/profile/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "로그아웃 버튼 추가"
+        }
+      ],
+      "implementationGuide": "1. app/actions/auth.ts에 logoutAction 추가 2. use server 선언 3. const supabase = await createClient() 4. await supabase.auth.signOut() 5. redirect('/auth/login') 6. 프로필 페이지에서 호출",
+      "verificationCriteria": "로그아웃 후 세션 삭제, login 페이지로 리다이렉트, 재로그인 가능",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
+    },
+    {
+      "id": "85428cec-38d9-4e93-972f-f8ad4fc21af8",
+      "name": "Task 009-1: 이벤트 수정/삭제 API",
+      "description": "기존 POST /api/events 확장하여 PUT(수정), DELETE(삭제) 라우트 추가. 소유자만 수정/삭제 가능.",
+      "notes": "초대 코드는 변경 불가. updated_at으로 낙관적 업데이트 대응.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "912ce452-f662-4ea2-99d6-3f6e5aa7e0f8"
+        }
+      ],
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
+      "relatedFiles": [
+        {
+          "path": "app/api/events/[id]/route.ts",
+          "type": "CREATE",
+          "description": "PUT/DELETE 핸들러"
+        },
+        {
+          "path": "lib/schemas/event.ts",
+          "type": "REFERENCE",
+          "description": "eventSchema 참조"
+        }
+      ],
+      "implementationGuide": "1. app/api/events/[id]/route.ts 생성 2. PUT: 권한 검증(created_by=user.id) → Zod 검증 → UPDATE 3. DELETE: 권한 검증 → DELETE 4. 오류: 404(없음), 403(권한), 400(검증) 5. RLS 정책과 이중 검증",
+      "verificationCriteria": "소유자만 수정/삭제, 권한 없으면 403, 검증 정상, 초대 코드 유지",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
+    },
+    {
+      "id": "511d5e42-9ee8-4d3d-a30b-dc1d7688c379",
+      "name": "Task 009-2: 이미지 업로드 API",
+      "description": "이벤트 커버 이미지를 Supabase Storage에 업로드. 파일 검증 후 공개 URL 반환.",
+      "notes": "초대 링크: /join/[inviteCode] 형식. Storage는 public 설정.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "85428cec-38d9-4e93-972f-f8ad4fc21af8"
+        }
+      ],
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
+      "relatedFiles": [
+        {
+          "path": "app/api/events/[id]/upload/route.ts",
+          "type": "CREATE",
+          "description": "이미지 업로드 API"
+        }
+      ],
+      "implementationGuide": "1. POST /api/events/[id]/upload 라우트 2. FormData에서 file 추출 3. 검증: image/* 타입, 5MB 이하 4. supabase.storage.from(event-covers).upload() 5. 공개 URL 반환 및 events 테이블 업데이트 6. 이전 이미지 삭제",
+      "verificationCriteria": "이미지 업로드 후 URL 반환, 파일 검증 정상, 이전 이미지 삭제, 초대 링크 정상 구성",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
+    },
+    {
+      "id": "bb9ae3ec-9392-40e0-84b6-caf0028dfc38",
+      "name": "Task 010-1: 초대 링크 참여 로직",
+      "description": "GET /join/[inviteCode]에서 초대 코드 검증 후 event_participants 테이블에 참여자 레코드 자동 생성. 중복 방지.",
+      "notes": "DB 유니크: (user_id, event_id). RLS: 본인만 INSERT. 만료 확인은 추후.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "511d5e42-9ee8-4d3d-a30b-dc1d7688c379"
+        }
+      ],
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
       "relatedFiles": [
         {
           "path": "app/join/[inviteCode]/page.tsx",
-          "type": "CREATE",
-          "description": "초대 링크 참여 페이지 (공개)"
+          "type": "TO_MODIFY",
+          "description": "참여 로직"
         },
         {
-          "path": "app/profile/page.tsx",
+          "path": "app/actions/events.ts",
           "type": "CREATE",
-          "description": "사용자 프로필 페이지"
-        },
-        {
-          "path": "app/profile/edit/page.tsx",
-          "type": "CREATE",
-          "description": "프로필 수정 페이지"
-        },
-        {
-          "path": "app/admin/login/page.tsx",
-          "type": "CREATE",
-          "description": "관리자 로그인 페이지"
-        },
-        {
-          "path": "app/admin/dashboard/page.tsx",
-          "type": "CREATE",
-          "description": "관리자 대시보드 페이지"
-        },
-        {
-          "path": "app/admin/events/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 관리 페이지"
-        },
-        {
-          "path": "app/admin/users/page.tsx",
-          "type": "CREATE",
-          "description": "사용자 관리 페이지"
-        },
-        {
-          "path": "app/admin/stats/page.tsx",
-          "type": "CREATE",
-          "description": "통계 분석 페이지"
-        },
-        {
-          "path": "app/admin/layout.tsx",
-          "type": "DEPENDENCY",
-          "description": "관리자 레이아웃"
+          "description": "joinEventAction"
         }
       ],
-      "implementationGuide": "각 페이지 빈 껍데기 패턴:\nexport default function PageName() {\n  return (\n    <main className='container mx-auto px-4 py-6'>\n      <h1 className='text-2xl font-bold'>페이지명</h1>\n    </main>\n  )\n}\n\n// join/[inviteCode]/page.tsx: params: { inviteCode: string } 선언\n// admin/login/page.tsx: 관리자 레이아웃 적용 안됨 (별도 디렉토리 고려 or layout에서 제외 처리)\n// admin 페이지들: AdminLayout 자동 적용",
-      "verificationCriteria": "9개 페이지 모두 접근 시 정상 렌더링. /admin/login은 사이드바 없이 표시. /join/[inviteCode]는 인증 없이 접근 가능. TypeScript 에러 없음.",
-      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+      "implementationGuide": "1. app/join/[inviteCode]/page.tsx: joinEventAction 호출 2. inviteCode로 이벤트 조회 3. INSERT event_participants(user_id, event_id) 4. 중복 시 에러 처리 5. 성공 시 /events/[id]로 리다이렉트",
+      "verificationCriteria": "초대 링크로 참여 성공, 중복 방지, 참여자 수 업데이트, 권한 검증",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
     },
     {
-      "id": "e96db338-3760-489b-8db3-8643d09b710c",
-      "name": "Task 002: 비즈니스 로직 TypeScript 타입 정의",
-      "description": "lib/types/ 디렉토리에 이벤트, 사용자, 공통 타입을 정의합니다. 현재 lib/types/database.ts의 Profile 타입을 참고하여 확장하고, 더미 데이터 활용(Phase 2)에 대비한 프론트엔드 타입을 설계합니다. DB 스키마는 Task 007에서 확정되므로, 이 단계에서는 UI 기반 임시 타입으로 정의합니다.",
-      "notes": "타입은 임시(UI 기반)이므로 'TODO: Task 007에서 DB 스키마와 동기화' 주석 추가. database.ts의 Profile 인터페이스는 수정하지 않고 UserProfile에서 extends로 확장.",
+      "id": "defa4af1-79c5-4247-b77e-94c2267e52b2",
+      "name": "Task 011-1: 관리자 API 구현",
+      "description": "관리자 전용 API 구현. 통계(COUNT), 이벤트/사용자 테이블 관리(페이지네이션, 검색), 시계열 데이터. 모든 API는 role='admin' 검증.",
+      "notes": "RLS: admin만 전체 접근. 인덱스 활용. 대규모 데이터 집계 함수 사용.",
       "status": "pending",
-      "dependencies": [],
-      "createdAt": "2026-06-10T08:22:02.284Z",
-      "updatedAt": "2026-06-10T08:22:02.284Z",
-      "relatedFiles": [
+      "dependencies": [
         {
-          "path": "lib/types/event.types.ts",
-          "type": "CREATE",
-          "description": "이벤트 관련 타입 정의"
-        },
-        {
-          "path": "lib/types/user.types.ts",
-          "type": "CREATE",
-          "description": "사용자 관련 타입 정의"
-        },
-        {
-          "path": "lib/types/common.types.ts",
-          "type": "CREATE",
-          "description": "공통 API 타입 정의"
-        },
-        {
-          "path": "lib/types/index.ts",
-          "type": "CREATE",
-          "description": "타입 통합 export 파일"
-        },
-        {
-          "path": "lib/types/database.ts",
-          "type": "REFERENCE",
-          "description": "기존 Profile 타입 참고"
+          "taskId": "bb9ae3ec-9392-40e0-84b6-caf0028dfc38"
         }
       ],
-      "implementationGuide": "// lib/types/event.types.ts\nenum EventStatus { UPCOMING, ONGOING, COMPLETED, CANCELLED }\ninterface Event { id, title, description, date, location, coverImage, createdBy, inviteCode, maxParticipants, status, createdAt, updatedAt }\ninterface EventParticipant { userId, eventId, joinedAt }\ntype CreateEventInput = Omit<Event, 'id' | 'inviteCode' | 'createdAt' | 'updatedAt'>\n\n// lib/types/user.types.ts\nenum UserRole { USER, ADMIN }\ninterface UserProfile extends Profile { role: UserRole }\n\n// lib/types/common.types.ts\ninterface ApiResponse<T> { data: T | null; error: string | null }\ninterface PaginationParams { page: number; limit: number }\ninterface PaginatedResponse<T> { items: T[]; total: number; page: number; totalPages: number }\n\n// lib/types/index.ts\nexport * from './event.types'\nexport * from './user.types'\nexport * from './common.types'",
-      "verificationCriteria": "npm run typecheck 에러 없음. @/lib/types에서 모든 타입 import 가능. Event, UserProfile, ApiResponse<T> 등 주요 타입 정상 사용 확인.",
-      "analysisResult": "Task 001은 Gather 플랫폼의 Phase 1 골격 구축 작업입니다. Next.js 15 App Router 기반으로 13개 페이지 라우트 구조, 레이아웃 컴포넌트, middleware.ts를 생성합니다. 기존 인증 시스템(lib/supabase/proxy.ts, components/auth-button.tsx, components/logout-button.tsx)을 최대한 재사용하며, 빈 껍데기 페이지 형태로 구현합니다."
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
+      "relatedFiles": [
+        {
+          "path": "app/api/admin/stats/route.ts",
+          "type": "CREATE",
+          "description": "통계 API"
+        },
+        {
+          "path": "app/api/admin/events/route.ts",
+          "type": "CREATE",
+          "description": "이벤트 관리"
+        },
+        {
+          "path": "app/api/admin/users/route.ts",
+          "type": "CREATE",
+          "description": "사용자 관리"
+        }
+      ],
+      "implementationGuide": "1. GET /api/admin/stats: 집계 쿼리 2. GET /api/admin/events?page=1&limit=10: 목록 3. GET /api/admin/users: 사용자 목록 4. GET /api/admin/analytics: 날짜별 그룹 5. DELETE /api/admin/events/[id]: 강제 삭제 6. 모든 라우트: role 검증",
+      "verificationCriteria": "관리자만 접근, 통계 정확, 페이지네이션 정상, 검색/필터 작동, 삭제 정상",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
+    },
+    {
+      "id": "cfc6dead-021f-4eb4-b88e-b799799c6d35",
+      "name": "Task 012-1: E2E 통합 테스트",
+      "description": "주최자, 참여자, 관리자 세 플로우에 대한 Playwright 자동화 테스트. 회가입부터 데이터 관리까지 모든 과정 검증.",
+      "notes": "Playwright MCP 사용. 테스트 계정 고정값 또는 자동 생성.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "defa4af1-79c5-4247-b77e-94c2267e52b2"
+        }
+      ],
+      "createdAt": "2026-06-26T06:08:03.292Z",
+      "updatedAt": "2026-06-26T06:08:03.292Z",
+      "relatedFiles": [
+        {
+          "path": ".playwright-mcp/tests/phase3.spec.ts",
+          "type": "CREATE",
+          "description": "E2E 테스트"
+        }
+      ],
+      "implementationGuide": "1. .playwright-mcp/fixtures/users.ts: 테스트 계정 생성 2. tests/flows/organizer.spec.ts: 가입→생성→공유→참여자 확인 3. tests/flows/participant.spec.ts: 초대링크→입장→조회 4. tests/flows/admin.spec.ts: 로그인→대시보드→관리 5. 에러 케이스: 권한 없음, 중복 참여, 404",
+      "verificationCriteria": "모든 플로우 통과, 에러 케이스 검증, Lighthouse 80+",
+      "analysisResult": "Phase 3: 데이터베이스 설정 및 핵심 기능 구현. Supabase 스키마 기반으로 인증, CRUD, 참여자 관리, 관리자 대시보드, 통합 테스트를 순차적으로 구현. 기존 Supabase SSR 패턴 + React Hook Form + Zod 스키마 활용. 모든 API는 일관된 에러 처리와 RLS 정책 이중 보안 적용."
     }
   ]
 }
